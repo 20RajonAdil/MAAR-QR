@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://maar-qr.example.com/sitemap.xml

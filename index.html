@@ -37,6 +37,39 @@
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is MAAR QR really free, with no limits?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. There's no sign-up, no paywall and no cap on how many QR codes you can generate. Everything runs locally in your browser, so there's no server cost that would require charging you." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does MAAR QR store or upload what I type?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Every QR code is drawn directly onto a canvas in your browser using client-side JavaScript. Nothing you enter is ever sent to a server." }
+    },
+    {
+      "@type": "Question",
+      "name": "What types of QR codes can I create?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Links, plain text, Wi-Fi credentials, phone numbers, email, SMS, WhatsApp messages, contact cards (vCard), locations, calendar events and crypto payment addresses." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I add my own logo or colors to a QR code?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. You can set custom foreground colors or gradients, choose square, rounded or dot module shapes, adjust error correction, and place a centered logo without hurting scannability." }
+    },
+    {
+      "@type": "Question",
+      "name": "What formats can I download my QR code in?",
+      "acceptedAnswer": { "@type": "Answer", "text": "PNG, SVG and PDF, plus a one-click copy-to-clipboard option." }
+    }
+  ]
+}
+</script>
 
 <!-- Favicon & icons -->
 <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
@@ -74,6 +107,7 @@
       <li><a href="#scanner">Scanner</a></li>
       <li><a href="#history">History</a></li>
       <li><a href="#roadmap">Roadmap</a></li>
+      <li><a href="#faq">FAQ</a></li>
       <li><a href="#privacy">Privacy</a></li>
     </ul>
     <div class="nav__actions">
@@ -475,6 +509,40 @@
 
   <div class="container"><hr class="section-divider"></div>
 
+  <!-- ================= FAQ ================= -->
+  <section class="section" id="faq">
+    <div class="container">
+      <div class="section__head reveal">
+        <span class="eyebrow"><span class="dot"></span> FAQ</span>
+        <h2>Common questions.</h2>
+      </div>
+      <div class="faq-list reveal" style="display:flex; flex-direction:column; gap:18px; max-width:70ch;">
+        <div class="faq-item">
+          <h3 style="font-size:1.05rem; margin-bottom:6px;">Is MAAR QR really free, with no limits?</h3>
+          <p style="color:var(--text-1);">Yes. There's no sign-up, no paywall and no cap on how many QR codes you can generate. Everything runs locally in your browser, so there's no server cost that would require charging you.</p>
+        </div>
+        <div class="faq-item">
+          <h3 style="font-size:1.05rem; margin-bottom:6px;">Does MAAR QR store or upload what I type?</h3>
+          <p style="color:var(--text-1);">No. Every QR code is drawn directly onto a canvas in your browser using client-side JavaScript. Nothing you enter — links, Wi-Fi passwords, contact details — is ever sent to a server.</p>
+        </div>
+        <div class="faq-item">
+          <h3 style="font-size:1.05rem; margin-bottom:6px;">What types of QR codes can I create?</h3>
+          <p style="color:var(--text-1);">Links, plain text, Wi-Fi credentials, phone numbers, email, SMS, WhatsApp messages, contact cards (vCard), locations, calendar events and crypto payment addresses.</p>
+        </div>
+        <div class="faq-item">
+          <h3 style="font-size:1.05rem; margin-bottom:6px;">Can I add my own logo or colors to a QR code?</h3>
+          <p style="color:var(--text-1);">Yes. You can set custom foreground colors or gradients, choose square, rounded or dot module shapes, adjust error correction, and place a centered logo without hurting scannability.</p>
+        </div>
+        <div class="faq-item">
+          <h3 style="font-size:1.05rem; margin-bottom:6px;">What formats can I download my QR code in?</h3>
+          <p style="color:var(--text-1);">PNG, SVG and PDF, plus a one-click copy-to-clipboard option, so you can drop it straight into print materials or digital designs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container"><hr class="section-divider"></div>
+
   <!-- ================= COMING SOON ================= -->
   <section class="section" id="roadmap">
     <div class="container">
@@ -563,12 +631,12 @@
 </div>
 
 <!-- Third-party rendering libraries: static client-side code, no data ever transmitted -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 
-<script src="js/qr-engine.js"></script>
-<script src="js/app.js"></script>
+<script src="js/qr-engine.js" defer></script>
+<script src="js/app.js" defer></script>
 
 <script>
   // Sync the hero quick-input with the main generator's URL field

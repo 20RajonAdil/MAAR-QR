@@ -105,6 +105,7 @@
     <ul class="nav__links" id="navLinks">
       <li><a href="#generator">Generator</a></li>
       <li><a href="#scanner">Scanner</a></li>
+      <li><a href="#edit">Edit</a></li>
       <li><a href="#history">History</a></li>
       <li><a href="#roadmap">Roadmap</a></li>
       <li><a href="#faq">FAQ</a></li>
@@ -492,6 +493,35 @@
 
   <div class="container"><hr class="section-divider"></div>
 
+  <!-- ================= EDIT EXISTING QR ================= -->
+  <section class="section" id="edit">
+    <div class="container">
+      <div class="section__head reveal">
+        <span class="eyebrow"><span class="dot"></span> Edit</span>
+        <h2>Edit an existing QR code.</h2>
+        <p>Upload a photo or screenshot of any QR code and MAAR QR will read out whatever it holds — a link, Wi-Fi details, a contact card, anything — straight into the generator so you can change it and create an updated code.</p>
+      </div>
+      <div class="scanner reveal">
+        <div>
+          <label class="edit-drop" id="editDropLabel" for="editFileInput">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            <span class="edit-drop__title">Click to upload, or drag a QR code image here</span>
+            <span class="edit-drop__hint">PNG, JPG, WEBP or SVG — nothing is uploaded anywhere</span>
+          </label>
+          <input type="file" id="editFileInput" accept="image/*" class="visually-hidden">
+          <canvas id="editCanvas" class="visually-hidden"></canvas>
+        </div>
+        <div>
+          <h3 style="font-size:1.2rem; margin-bottom:10px;">Upload, then adjust</h3>
+          <p style="color:var(--text-1); margin-bottom:22px; max-width:44ch;">The image is decoded fully on your device. As soon as MAAR QR works out what kind of data the code holds, it fills in the matching fields in the generator above — ready for you to edit and turn into a freshly styled code.</p>
+          <div class="scanner__result" id="editResult" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container"><hr class="section-divider"></div>
+
   <!-- ================= HISTORY ================= -->
   <section class="section" id="history">
     <div class="container">
@@ -609,6 +639,7 @@
           <h4>Product</h4>
           <a href="#generator">Generator</a>
           <a href="#scanner">Scanner</a>
+          <a href="#edit">Edit a code</a>
           <a href="#history">History</a>
         </div>
         <div class="footer__col">

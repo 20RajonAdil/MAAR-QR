@@ -702,6 +702,87 @@
     }, 350);
   }
 
+  /* -- Verification gate: what/why/use + ownership confirmation -------- */
+  const gateBackdrop = el('editGateBackdrop');
+  const gateWhat = el('gateWhat');
+  const gateWhy = el('gateWhy');
+  const gateUse = el('gateUse');
+  const gateConfirm = el('gateConfirm');
+  const gateContinue = el('gateContinue');
+  const gateCancel = el('gateCancel');
+  let pendingScan = null; // { type, text }
+
+  function gateReady() {
+    return gateWhat.value.trim() && gateWhy.value.trim() && gateUse.value.trim() && gateConfirm.checked;
+  }
+  function refreshGateButton() {
+    gateContinue.disabled = !gateReady();
+  }
+  [gateWhat, gateWhy, gateUse].forEach(i => i?.addEventListener('input', refreshGateButton));
+  gateConfirm?.addEventListener('change', refreshGateButton);
+
+  function openGate(type, text) {
+    pendingScan = { type, text };
+    gateWhat.value = ''; gateWhy.value = ''; gateUse.value = ''; gateConfirm.checked = false;
+    refreshGateButton();
+    gateBackdrop.hidden = false;
+    setTimeout(() => gateWhat.focus(), 50);
+  }
+  function closeGate() {
+    gateBackdrop.hidden = true;
+    pendingScan = null;
+  }
+  gateCancel?.addEventListener('click', closeGate);
+  gateBackdrop?.addEventListener('click', (e) => { if (e.target === gateBackdrop) closeGate(); });
+  gateContinue?.addEventListener('click', () => {
+    if (!pendingScan || !gateReady()) return;
+    const { type, text } = pendingScan;
+    const answers = { what: gateWhat.value.trim(), why: gateWhy.value.trim(), use: gateUse.value.trim() };
+    logEdit(type, answers);
+    closeGate();
+    applyScannedPayload(text);
+  });
+
+  /* -- Local-only edit log (this device only, like local history) ------ */
+  const EDIT_LOG_KEY = 'maarqr-edit-log';
+  const editLogList = el('editLogList');
+
+  function loadEditLog() {
+    try { return JSON.parse(localStorage.getItem(EDIT_LOG_KEY)) || []; }
+    catch { return []; }
+  }
+  function saveEditLog(items) {
+    localStorage.setItem(EDIT_LOG_KEY, JSON.stringify(items.slice(0, 50)));
+  }
+  function logEdit(type, answers) {
+    const items = loadEditLog();
+    items.unshift({ ts: Date.now(), type, ...answers });
+    saveEditLog(items);
+    renderEditLog();
+  }
+  function renderEditLog() {
+    if (!editLogList) return;
+    const items = loadEditLog();
+    if (!items.length) {
+      editLogList.innerHTML = '<div class="edit-log__empty">Edits you confirm will be logged here, stored only in this browser.</div>';
+      return;
+    }
+    editLogList.innerHTML = items.map(item => `
+      <div class="edit-log__item">
+        <div class="edit-log__row1"><span class="edit-log__type">${escapeHtml(typeLabels[item.type] || 'Code')}</span><span>${new Date(item.ts).toLocaleString()}</span></div>
+        <p><span>What: </span>${escapeHtml(item.what || '')}</p>
+        <p><span>Why: </span>${escapeHtml(item.why || '')}</p>
+        <p><span>Use: </span>${escapeHtml(item.use || '')}</p>
+      </div>
+    `).join('');
+  }
+  el('clearEditLog')?.addEventListener('click', () => {
+    localStorage.removeItem(EDIT_LOG_KEY);
+    renderEditLog();
+    toast('Edit log cleared');
+  });
+  renderEditLog();
+
   function decodeQrImage(file) {
     if (!file || !editCtx) return;
     if (!file.type || !file.type.startsWith('image/')) { toast('Please upload an image file'); return; }
@@ -721,7 +802,8 @@
         const imageData = editCtx.getImageData(0, 0, w, h);
         const code = jsQR(imageData.data, w, h, { inversionAttempts: 'attemptBoth' });
         if (code && code.data) {
-          applyScannedPayload(code.data);
+          const { type } = parseScannedPayload(code.data);
+          openGate(type, code.data);
         } else {
           toast("Couldn't find a QR code in that image");
         }

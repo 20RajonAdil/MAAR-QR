@@ -568,6 +568,191 @@
   stopScanBtn?.addEventListener('click', stopScan);
 
   /* ------------------------------------------------------------------ */
+  /* Edit an existing QR code — decode an uploaded image, then           */
+  /* populate the generator's fields with whatever it contains.         */
+  /* ------------------------------------------------------------------ */
+  const editFileInput = el('editFileInput');
+  const editDropLabel = el('editDropLabel');
+  const editResult = el('editResult');
+  const editCanvas = el('editCanvas');
+  const editCtx = editCanvas ? editCanvas.getContext('2d', { willReadFrequently: true }) : null;
+
+  function unescapeWifiVal(v) {
+    return (v || '').replace(/\\([\\;,":])/g, '$1');
+  }
+
+  // Reverses the "YYYYMMDDTHHmm00" format produced by icalDate() above.
+  function icalToLocal(v) {
+    if (!v || v.length < 13) return '';
+    const y = v.slice(0, 4), mo = v.slice(4, 6), d = v.slice(6, 8);
+    const hh = v.slice(9, 11) || '00', mi = v.slice(11, 13) || '00';
+    return `${y}-${mo}-${d}T${hh}:${mi}`;
+  }
+
+  // Best-effort reverse of the `builders` above: takes raw decoded QR text
+  // and works out which type it is and what its fields should be.
+  function parseScannedPayload(text) {
+    const t = (text || '').trim();
+    const grab = (re) => (t.match(re) || [])[1] || '';
+
+    if (/^WIFI:/i.test(t)) {
+      const sMatch = t.match(/S:((?:\\.|[^;])*);/);
+      const pMatch = t.match(/P:((?:\\.|[^;])*);/);
+      const tMatch = t.match(/T:([^;]*);/);
+      const hMatch = t.match(/H:([^;]*);/);
+      let enc = (tMatch?.[1] || 'WPA').toUpperCase();
+      if (enc === 'NOPASS') enc = 'nopass';
+      else if (enc !== 'WEP') enc = 'WPA';
+      return { type: 'wifi', fields: {
+        ssid: unescapeWifiVal(sMatch?.[1]),
+        pass: unescapeWifiVal(pMatch?.[1]),
+        enc,
+        hidden: /^true$/i.test(hMatch?.[1] || '')
+      } };
+    }
+
+    if (/^BEGIN:VCARD/i.test(t)) {
+      const name = grab(/\nFN:(.*)/i) || grab(/\nN:([^;\n]*)/i);
+      return { type: 'vcard', fields: {
+        name: name.trim(),
+        org: grab(/\nORG:(.*)/i).trim(),
+        title: grab(/\nTITLE:(.*)/i).trim(),
+        vphone: grab(/\nTEL[^:\n]*:(.*)/i).trim(),
+        vemail: grab(/\nEMAIL[^:\n]*:(.*)/i).trim(),
+        website: grab(/\nURL:(.*)/i).trim()
+      } };
+    }
+
+    if (/^BEGIN:VCALENDAR/i.test(t)) {
+      return { type: 'event', fields: {
+        title: grab(/\nSUMMARY:(.*)/i).trim(),
+        start: icalToLocal(grab(/\nDTSTART:(.*)/i).trim()),
+        end: icalToLocal(grab(/\nDTEND:(.*)/i).trim()),
+        location: grab(/\nLOCATION:(.*)/i).trim(),
+        desc: grab(/\nDESCRIPTION:(.*)/i).trim()
+      } };
+    }
+
+    if (/^tel:/i.test(t)) return { type: 'phone', fields: { phone: t.slice(4) } };
+
+    if (/^mailto:/i.test(t)) {
+      const [addr, query] = t.slice(7).split('?');
+      const params = new URLSearchParams(query || '');
+      return { type: 'email', fields: {
+        to: decodeURIComponent(addr || ''),
+        subject: params.get('subject') || '',
+        body: params.get('body') || ''
+      } };
+    }
+
+    if (/^SMSTO:/i.test(t)) {
+      const rest = t.slice(6);
+      const idx = rest.indexOf(':');
+      return { type: 'sms', fields: {
+        number: idx === -1 ? rest : rest.slice(0, idx),
+        message: idx === -1 ? '' : rest.slice(idx + 1)
+      } };
+    }
+
+    const wa = t.match(/^https?:\/\/(?:api\.)?wa\.me\/(\d+)(?:\?text=(.*))?$/i)
+      || t.match(/^https?:\/\/api\.whatsapp\.com\/send\?phone=(\d+)(?:&text=(.*))?$/i);
+    if (wa) return { type: 'whatsapp', fields: {
+      number: wa[1],
+      message: wa[2] ? decodeURIComponent(wa[2].replace(/\+/g, ' ')) : ''
+    } };
+
+    const maps = t.match(/^https?:\/\/maps\.google\.com\/\?q=(.+)$/i);
+    if (maps) {
+      const q = decodeURIComponent(maps[1]);
+      const coords = q.match(/^(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)$/);
+      return coords
+        ? { type: 'maps', fields: { lat: coords[1], lng: coords[2], address: '' } }
+        : { type: 'maps', fields: { lat: '', lng: '', address: q } };
+    }
+
+    const crypto = t.match(/^(bitcoin|ethereum|litecoin|dogecoin):([^?]+)(?:\?amount=([\d.]+))?/i);
+    if (crypto) return { type: 'crypto', fields: {
+      coin: crypto[1].toLowerCase(), address: crypto[2], amount: crypto[3] || ''
+    } };
+
+    if (/^https?:\/\//i.test(t)) return { type: 'url', fields: { url: t } };
+
+    return { type: 'text', fields: { text: t } };
+  }
+
+  function applyScannedPayload(text) {
+    const { type, fields } = parseScannedPayload(text);
+    const btn = document.querySelector(`.type-btn[data-type="${type}"]`);
+    btn?.click();
+    const f = fieldsFor(type);
+    Object.entries(fields).forEach(([k, v]) => {
+      const input = f[k];
+      if (!input) return;
+      if (input.type === 'checkbox') input.checked = !!v; else input.value = v ?? '';
+    });
+    scheduleRender();
+
+    if (editResult) {
+      editResult.classList.add('show');
+      editResult.innerHTML = `<div style="margin-bottom:6px; font-weight:600; color:var(--text-1);">Detected: ${typeLabels[type] || 'Text'}</div><div>${escapeHtml(text)}</div>`;
+    }
+    toast(`Loaded a ${(typeLabels[type] || 'Text').toLowerCase()} code — edit it below`);
+    setTimeout(() => {
+      document.getElementById('generator')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 350);
+  }
+
+  function decodeQrImage(file) {
+    if (!file || !editCtx) return;
+    if (!file.type || !file.type.startsWith('image/')) { toast('Please upload an image file'); return; }
+    if (typeof jsQR === 'undefined') { toast('Scanner library unavailable offline'); return; }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 1200;
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        editCanvas.width = w; editCanvas.height = h;
+        editCtx.clearRect(0, 0, w, h);
+        editCtx.drawImage(img, 0, 0, w, h);
+        const imageData = editCtx.getImageData(0, 0, w, h);
+        const code = jsQR(imageData.data, w, h, { inversionAttempts: 'attemptBoth' });
+        if (code && code.data) {
+          applyScannedPayload(code.data);
+        } else {
+          toast("Couldn't find a QR code in that image");
+        }
+      };
+      img.onerror = () => toast('Could not read that image file');
+      img.src = ev.target.result;
+    };
+    reader.onerror = () => toast('Could not read that image file');
+    reader.readAsDataURL(file);
+  }
+
+  editFileInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    decodeQrImage(file);
+    editFileInput.value = '';
+  });
+
+  ['dragover', 'dragenter'].forEach(evt => editDropLabel?.addEventListener(evt, (e) => {
+    e.preventDefault();
+    editDropLabel.classList.add('is-dragover');
+  }));
+  ['dragleave', 'drop'].forEach(evt => editDropLabel?.addEventListener(evt, (e) => {
+    e.preventDefault();
+    editDropLabel.classList.remove('is-dragover');
+  }));
+  editDropLabel?.addEventListener('drop', (e) => {
+    const file = e.dataTransfer?.files?.[0];
+    if (file) decodeQrImage(file);
+  });
+
+  /* ------------------------------------------------------------------ */
   /* Footer year                                                         */
   /* ------------------------------------------------------------------ */
   const yearEl = el('year');

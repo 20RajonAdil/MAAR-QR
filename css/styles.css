@@ -560,6 +560,49 @@ textarea.input{resize:vertical; min-height:90px; font-family:var(--font-body);}
 .edit-drop__hint{font-size:.76rem; opacity:.75;}
 
 /* ---------------------------------------------------------------------- */
+/* Edit log                                                                */
+/* ---------------------------------------------------------------------- */
+.edit-log{margin-top:36px; padding-top:28px; border-top:1px solid var(--border);}
+.edit-log__head{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:16px;}
+.edit-log__list{display:flex; flex-direction:column; gap:10px;}
+.edit-log__empty{padding:24px; text-align:center; color:var(--text-2); font-size:.85rem; border:1px dashed var(--border-strong); border-radius:var(--radius-m);}
+.edit-log__item{
+  padding:14px 16px; border-radius:var(--radius-s); background:var(--bg-1); border:1px solid var(--border);
+  display:flex; flex-direction:column; gap:4px; font-size:.82rem;
+}
+.edit-log__item .edit-log__row1{display:flex; justify-content:space-between; gap:12px; font-family:var(--font-mono); color:var(--text-2); font-size:.72rem;}
+.edit-log__item .edit-log__type{color:var(--emerald-bright); font-weight:700;}
+.edit-log__item p{margin:0; color:var(--text-1);}
+.edit-log__item p span{color:var(--text-2);}
+
+/* ---------------------------------------------------------------------- */
+/* Verification gate modal                                                 */
+/* ---------------------------------------------------------------------- */
+.modal-backdrop{
+  position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center;
+  padding:24px; background:rgba(3,10,8,0.72); backdrop-filter:blur(6px);
+}
+.modal-backdrop[hidden]{display:none;}
+.modal-panel{
+  width:100%; max-width:520px; max-height:88vh; overflow-y:auto;
+  padding:32px; box-shadow:var(--shadow-lift);
+}
+.modal-panel h3{font-size:1.25rem; margin-bottom:8px;}
+.modal-panel__intro{font-size:.86rem; color:var(--text-1); margin-bottom:22px;}
+.modal-panel .field{margin-bottom:16px;}
+.modal-panel__notice{
+  display:flex; gap:12px; align-items:flex-start; padding:16px; margin:22px 0 18px;
+  border-radius:var(--radius-s); background:rgba(209,106,91,0.08); border:1px solid rgba(209,106,91,0.28);
+}
+.modal-panel__notice svg{width:20px; height:20px; color:var(--danger); flex-shrink:0; margin-top:1px;}
+.modal-panel__notice p{font-size:.78rem; line-height:1.55; color:var(--text-1);}
+.modal-panel__checkbox{
+  display:flex; align-items:flex-start; gap:10px; font-size:.85rem; color:var(--text-1); cursor:pointer;
+}
+.modal-panel__checkbox input{margin-top:3px; accent-color:var(--emerald-bright);}
+.modal-panel__actions{display:flex; justify-content:flex-end; gap:12px; margin-top:24px;}
+
+/* ---------------------------------------------------------------------- */
 /* Coming soon                                                            */
 /* ---------------------------------------------------------------------- */
 .coming-grid{

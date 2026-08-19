@@ -499,7 +499,7 @@
       <div class="section__head reveal">
         <span class="eyebrow"><span class="dot"></span> Edit</span>
         <h2>Edit an existing QR code.</h2>
-        <p>Upload a photo or screenshot of any QR code and MAAR QR will read out whatever it holds — a link, Wi-Fi details, a contact card, anything — straight into the generator so you can change it and create an updated code.</p>
+        <p>Upload a photo or screenshot of any QR code and MAAR QR will read out whatever it holds — a link, Wi-Fi details, a contact card, anything — straight into the generator so you can change it and create an updated code. Before it's applied, you'll be asked what the code is and confirm you have the right to edit it.</p>
       </div>
       <div class="scanner reveal">
         <div>
@@ -512,10 +512,21 @@
           <canvas id="editCanvas" class="visually-hidden"></canvas>
         </div>
         <div>
-          <h3 style="font-size:1.2rem; margin-bottom:10px;">Upload, then adjust</h3>
-          <p style="color:var(--text-1); margin-bottom:22px; max-width:44ch;">The image is decoded fully on your device. As soon as MAAR QR works out what kind of data the code holds, it fills in the matching fields in the generator above — ready for you to edit and turn into a freshly styled code.</p>
+          <h3 style="font-size:1.2rem; margin-bottom:10px;">Upload, confirm, then adjust</h3>
+          <p style="color:var(--text-1); margin-bottom:22px; max-width:44ch;">The image is decoded fully on your device. You'll then be asked a few quick questions and asked to confirm you're allowed to edit this code, before it's loaded into the generator above.</p>
           <div class="scanner__result" id="editResult" role="status" aria-live="polite"></div>
         </div>
+      </div>
+
+      <div class="edit-log reveal" id="editLogWrap">
+        <div class="edit-log__head">
+          <div>
+            <h3 style="font-size:1rem; margin-bottom:4px;">Your edit log</h3>
+            <p style="font-size:.8rem; color:var(--text-2); margin:0;">Kept only in this browser — a record of what you told us about each code you've edited here.</p>
+          </div>
+          <button class="btn btn--ghost btn--sm" id="clearEditLog" type="button">Clear log</button>
+        </div>
+        <div class="edit-log__list" id="editLogList"></div>
       </div>
     </div>
   </section>
@@ -659,6 +670,42 @@
 <div class="toast" id="toast" role="status" aria-live="polite">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
   <span>Saved</span>
+</div>
+
+<!-- ================= EDIT VERIFICATION GATE ================= -->
+<div class="modal-backdrop" id="editGateBackdrop" hidden>
+  <div class="modal-panel card" role="dialog" aria-modal="true" aria-labelledby="editGateTitle">
+    <h3 id="editGateTitle">Before you edit this code</h3>
+    <p class="modal-panel__intro">A quick check before this code is loaded into the generator. This takes a few seconds and isn't shared anywhere — it's kept only on this device.</p>
+
+    <div class="field">
+      <label for="gateWhat">What is this QR code about?</label>
+      <input class="input" id="gateWhat" type="text" placeholder="e.g. my business's Wi-Fi guest network" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="gateWhy">Why do you want to edit it?</label>
+      <input class="input" id="gateWhy" type="text" placeholder="e.g. the password changed" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="gateUse">What will the edited code be used for?</label>
+      <input class="input" id="gateUse" type="text" placeholder="e.g. reprinting the sign in our café" autocomplete="off">
+    </div>
+
+    <div class="modal-panel__notice">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4M12 17h.01M10.3 3.9L2.5 17a2 2 0 001.7 3h15.6a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+      <p>Only edit a QR code if you own it or have permission from whoever does. A QR code can point to someone else's website, business details, contact information or other content — and that content is generally protected by copyright and related rights in most countries, even though the exact rules vary by jurisdiction. Changing or reusing someone else's QR code without permission can carry legal consequences where you or they are located. MAAR QR doesn't check ownership for you — this confirmation, and the questions above, are recorded in your local edit log as your own record of why an edit was made.</p>
+    </div>
+
+    <label class="modal-panel__checkbox">
+      <input type="checkbox" id="gateConfirm">
+      <span>I own this QR code, or I have permission from its owner to edit it.</span>
+    </label>
+
+    <div class="modal-panel__actions">
+      <button class="btn btn--ghost btn--sm" id="gateCancel" type="button">Cancel</button>
+      <button class="btn btn--primary btn--sm" id="gateContinue" type="button" disabled>Continue &amp; load into editor</button>
+    </div>
+  </div>
 </div>
 
 <!-- Third-party rendering libraries: static client-side code, no data ever transmitted -->

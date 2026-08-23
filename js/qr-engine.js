@@ -71,7 +71,15 @@ const QREngine = (() => {
         if (!matrix[r][c]) continue;
         const x = (c + margin) * moduleSize;
         const y = (r + margin) * moduleSize;
-        drawModule(ctx, x, y, moduleSize, radius, shape);
+        if (isFinderModule(r, c, count)) {
+          // Finder patterns (the 3 corner "eyes") must stay crisp solid
+          // squares no matter the chosen module style — scanners locate
+          // the whole code from their geometry, so rounding/dotting them
+          // makes the code unreliable or unreadable.
+          ctx.fillRect(x, y, moduleSize, moduleSize);
+        } else {
+          drawModule(ctx, x, y, moduleSize, radius, shape);
+        }
       }
     }
 
@@ -117,6 +125,16 @@ const QREngine = (() => {
     ctx.closePath();
   }
 
+  /** True if (r,c) falls inside one of the 8x8 corner finder-pattern zones
+   *  (the 7x7 "eye" plus its 1-module white separator). Kept as a solid
+   *  square block in every style so the code stays scannable. */
+  function isFinderModule(r, c, count) {
+    const inTL = r < 8 && c < 8;
+    const inTR = r < 8 && c >= count - 8;
+    const inBL = r >= count - 8 && c < 8;
+    return inTL || inTR || inBL;
+  }
+
   /** Generate standalone SVG markup for the current settings */
   function toSVG(options) {
     const matrix = buildMatrix(options.data, options.ecLevel);
@@ -148,7 +166,9 @@ const QREngine = (() => {
         if (!matrix[r][c]) continue;
         const x = (c + margin) * moduleSize;
         const y = (r + margin) * moduleSize;
-        if (shape === 'square' || radius === 0) {
+        if (isFinderModule(r, c, count)) {
+          modules += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${moduleSize.toFixed(2)}" height="${moduleSize.toFixed(2)}" fill="${fill}"/>`;
+        } else if (shape === 'square' || radius === 0) {
           modules += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${moduleSize.toFixed(2)}" height="${moduleSize.toFixed(2)}" fill="${fill}"/>`;
         } else if (shape === 'dots') {
           const cx = x + moduleSize / 2, cy = y + moduleSize / 2;

@@ -547,14 +547,15 @@
   function onScanResult(text) {
     scannerResult.classList.add('show');
     const isLink = /^https?:\/\//i.test(text);
+    const shown = readableScanText(text);
     scannerResult.innerHTML = `
-      <div style="margin-bottom:10px; word-break:break-all;">${escapeHtml(text)}</div>
+      <div style="margin-bottom:10px; word-break:break-all; white-space:pre-wrap;">${escapeHtml(shown)}</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <button class="btn btn--sm btn--primary" id="scanCopyBtn" type="button">Copy result</button>
         ${isLink ? `<a class="btn btn--sm btn--ghost" href="${encodeURI(text)}" target="_blank" rel="noopener noreferrer">Open link</a>` : ''}
       </div>`;
     document.getElementById('scanCopyBtn')?.addEventListener('click', () => {
-      navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard'));
+      navigator.clipboard.writeText(shown).then(() => toast('Copied to clipboard'));
     });
   }
 
@@ -562,6 +563,25 @@
     const d = document.createElement('div');
     d.textContent = str;
     return d.innerHTML;
+  }
+
+  // Some QR generators percent-encode free text before embedding it (e.g.
+  // %20 for spaces, %0A for line breaks) — usually because it was built to
+  // slot into a URL query string. If we detect that pattern in something
+  // that isn't itself a URL, decode it back to readable text for display
+  // and for editing. Malformed encoding is left untouched rather than
+  // throwing.
+  function smartDecode(text) {
+    if (!text || !/%[0-9A-Fa-f]{2}/.test(text)) return text;
+    try {
+      const decoded = decodeURIComponent(text);
+      return decoded;
+    } catch {
+      return text;
+    }
+  }
+  function readableScanText(text) {
+    return /^https?:\/\//i.test(text) ? text : smartDecode(text);
   }
 
   startScanBtn?.addEventListener('click', startScan);
@@ -677,7 +697,7 @@
 
     if (/^https?:\/\//i.test(t)) return { type: 'url', fields: { url: t } };
 
-    return { type: 'text', fields: { text: t } };
+    return { type: 'text', fields: { text: smartDecode(t) } };
   }
 
   function applyScannedPayload(text) {
@@ -694,7 +714,8 @@
 
     if (editResult) {
       editResult.classList.add('show');
-      editResult.innerHTML = `<div style="margin-bottom:6px; font-weight:600; color:var(--text-1);">Detected: ${typeLabels[type] || 'Text'}</div><div>${escapeHtml(text)}</div>`;
+      const shown = readableScanText(text);
+      editResult.innerHTML = `<div style="margin-bottom:6px; font-weight:600; color:var(--text-1);">Detected: ${typeLabels[type] || 'Text'}</div><div style="white-space:pre-wrap;">${escapeHtml(shown)}</div>`;
     }
     toast(`Loaded a ${(typeLabels[type] || 'Text').toLowerCase()} code — edit it below`);
     setTimeout(() => {

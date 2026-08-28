@@ -1,6 +1,6 @@
 # MAAR QR
 
-A premium, privacy-first QR code studio. Generate styled QR codes for links, Wi-Fi, contacts, payments, events and more, scan codes with your camera, and keep a local history — all client-side, with no backend, accounts, or tracking.
+A premium, privacy-first QR code studio. Generate styled QR codes for links, Wi-Fi, contacts, payments, events and more, and keep a local history — all client-side, with no backend, accounts, or tracking.
 
 ## Project structure
 
@@ -11,7 +11,8 @@ maar-qr/
 │   └── styles.css      Design system: tokens, layout, components, animations
 ├── js/
 │   ├── qr-engine.js    Canvas/SVG rendering (colors, gradients, shapes, logo)
-│   └── app.js          UI wiring: forms, customization, history, scanner, theme
+│   ├── app.js          UI wiring: forms, customization, history, theme
+│   └── vendor/         Self-hosted qrcode-generator + jsPDF (no CDN dependency)
 ├── icons/
 │   └── favicon.svg     Custom "M" + QR corner-marker mark
 ├── assets/              (reserved for future static assets)
@@ -20,11 +21,10 @@ maar-qr/
 
 ## How it works
 
-- **QR generation** is done with the [`qrcode-generator`](https://github.com/kazuhikoarase/qrcode-generator) matrix encoder (loaded from cdnjs), which `js/qr-engine.js` renders itself onto `<canvas>` or as raw SVG — giving full control over color, gradients, module shape, margin, error-correction level, and a centered logo. No image is ever generated on a server.
-- **Scanning** uses [`jsQR`](https://github.com/cozmo/jsQR) to decode frames pulled from `getUserMedia()` locally in the browser.
+- **QR generation** is done with the [`qrcode-generator`](https://github.com/kazuhikoarase/qrcode-generator) matrix encoder, which `js/qr-engine.js` renders itself onto `<canvas>` or as raw SVG — giving full control over color, gradients, module shape, margin, error-correction level, and a centered logo. No image is ever generated on a server.
 - **PDF export** uses [`jsPDF`](https://github.com/parallax/jsPDF) to embed the rendered PNG in a print-ready page.
 - **History** is stored in `localStorage` only, capped at 12 entries, and never transmitted anywhere.
-- All three libraries are static, client-side rendering/decoding utilities loaded from cdnjs — no data is ever sent to them or anywhere else.
+- Both libraries are self-hosted in `js/vendor/` (with a CDN fallback only if the local copy fails to load) — static, client-side rendering utilities with no data ever sent to them or anywhere else.
 
 ## Running locally
 

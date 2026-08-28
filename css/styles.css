@@ -284,6 +284,26 @@ html[data-theme="light"] .theme-toggle .sun{display:block;}
 /* ---------------------------------------------------------------------- */
 .hero{
   padding:88px 0 64px;
+  position:relative;
+  overflow:hidden;
+}
+.floating-lines{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  z-index:0;
+  pointer-events:none;
+  opacity:.9;
+  mix-blend-mode:screen;
+  -webkit-mask-image:linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
+  mask-image:linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
+}
+html[data-theme="light"] .floating-lines{
+  opacity:.85;
+  mix-blend-mode:multiply;
+}
+.hero__grid{
+  position:relative;
+  z-index:1;
 }
 .hero__grid{
   display:grid;

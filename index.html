@@ -127,6 +127,7 @@
 
   <!-- ================= HERO ================= -->
   <section class="hero">
+    <canvas class="floating-lines" id="heroFloatingLines" aria-hidden="true"></canvas>
     <div class="container hero__grid">
       <div class="hero__copy">
         <span class="eyebrow"><span class="dot"></span> No sign-up · No servers · No limits</span>
@@ -604,6 +605,7 @@
 <script>window.jspdf || document.write('<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"><\/script>');</script>
 
 <script src="js/qr-engine.js" defer></script>
+<script src="js/floating-lines.js" defer></script>
 <script src="js/app.js" defer></script>
 
 <script>
@@ -613,6 +615,23 @@
     if (urlField) {
       urlField.value = e.target.value;
       urlField.dispatchEvent(new Event('input'));
+    }
+  });
+
+  // Ambient animated background for the hero
+  document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('heroFloatingLines');
+    if (canvas && window.FloatingLines) {
+      new FloatingLines(canvas, {
+        enabledWaves: ['top', 'middle', 'bottom'],
+        lineCount: [10, 15, 20],
+        lineDistance: [8, 6, 4],
+        bendRadius: 5.0,
+        bendStrength: -0.5,
+        interactive: true,
+        parallax: true,
+        gradientStart: '#264808'
+      });
     }
   });
 </script>

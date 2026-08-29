@@ -510,6 +510,51 @@ textarea.input{resize:vertical; min-height:90px; font-family:var(--font-body);}
 }
 .privacy-note svg{width:18px;height:18px; color:var(--gold-bright); flex-shrink:0; margin-top:1px;}
 .privacy-note p{font-size:.82rem; color:var(--text-1);}
+.privacy-note a{color:var(--emerald-bright); font-weight:600; text-decoration:underline; text-underline-offset:2px; white-space:nowrap;}
+
+/* ---------------------------------------------------------------------- */
+/* Legal document layout (Privacy Policy)                                 */
+/* ---------------------------------------------------------------------- */
+.legal-updated{color:var(--text-2); font-size:.88rem;}
+.legal-layout{
+  display:grid; grid-template-columns:220px 1fr; gap:56px; align-items:start;
+  max-width:980px; margin:0 auto;
+}
+.legal-toc{
+  position:sticky; top:96px;
+  display:flex; flex-direction:column; gap:2px;
+  font-size:.82rem;
+}
+.legal-toc span{
+  font-family:var(--font-mono); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--text-2); margin-bottom:10px;
+}
+.legal-toc a{
+  padding:7px 10px; border-radius:var(--radius-s); color:var(--text-1);
+  transition:background .2s, color .2s;
+}
+.legal-toc a:hover{background:var(--surface); color:var(--emerald-bright);}
+.legal-body h2{
+  font-size:1.28rem; margin:0 0 14px; scroll-margin-top:100px;
+}
+.legal-body > h2:not(:first-child){margin-top:42px;}
+.legal-body p{color:var(--text-1); line-height:1.75; margin-bottom:14px;}
+.legal-body ul{color:var(--text-1); line-height:1.75; margin:0 0 14px; padding-left:22px;}
+.legal-body li{margin-bottom:7px;}
+.legal-body a{color:var(--emerald-bright); text-decoration:underline; text-underline-offset:3px;}
+.legal-body code{
+  font-family:var(--font-mono); font-size:.86em;
+  background:var(--surface); border:1px solid var(--border); border-radius:4px;
+  padding:1px 6px;
+}
+@media (max-width:860px){
+  .legal-layout{grid-template-columns:1fr; gap:26px;}
+  .legal-toc{
+    position:static; flex-direction:row; flex-wrap:wrap; gap:8px;
+  }
+  .legal-toc span{width:100%; margin-bottom:2px;}
+  .legal-toc a{padding:5px 10px; background:var(--surface); border:1px solid var(--border);}
+}
 
 /* ---------------------------------------------------------------------- */
 /* History                                                                 */

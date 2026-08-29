@@ -194,6 +194,7 @@ html[data-theme="light"] .orb{opacity:.28;}
 .nav__actions{display:flex; align-items:center; gap:10px;}
 
 .theme-toggle{
+  position:relative; overflow:hidden; z-index:0;
   width:40px; height:40px; border-radius:12px;
   border:1px solid var(--border-strong);
   background:var(--surface);
@@ -209,6 +210,7 @@ html[data-theme="light"] .theme-toggle .moon{display:none;}
 html[data-theme="light"] .theme-toggle .sun{display:block;}
 
 .nav__toggle{
+  position:relative; overflow:hidden; z-index:0;
   display:none;
   width:40px;height:40px; border-radius:12px;
   border:1px solid var(--border-strong); background:var(--surface); color:var(--text-0);
@@ -220,7 +222,10 @@ html[data-theme="light"] .theme-toggle .sun{display:block;}
 /* ---------------------------------------------------------------------- */
 .btn{
   --btn-shadow: var(--shadow-soft);
+  --shine-x:50%; --shine-y:50%; --shine-o:0;
   position:relative;
+  overflow:hidden;
+  z-index:0;
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
   padding:13px 24px;
   font-family:var(--font-body); font-weight:600; font-size:.92rem;
@@ -254,6 +259,51 @@ html[data-theme="light"] .theme-toggle .sun{display:block;}
 .btn--icon{padding:11px; border-radius:12px;}
 .btn svg{width:16px;height:16px; flex-shrink:0;}
 .btn:disabled{opacity:.45; cursor:not-allowed; transform:none !important;}
+
+/* ---------------------------------------------------------------------- */
+/* Button shine — glare sweep on hover + cursor-follow specular highlight.
+   Applied to every button-like control site-wide. Both effects live on
+   ::before/::after with a negative z-index so they always render behind
+   the button's own text/icon (never on top of it, no matter how plain
+   the button's markup is) and are clipped to the button's own shape by
+   its overflow:hidden — they can't bleed outside it.                    */
+/* ---------------------------------------------------------------------- */
+.btn, .theme-toggle, .nav__toggle, .type-btn{
+  --shine-x:50%; --shine-y:50%; --shine-o:0;
+}
+.btn::before, .theme-toggle::before, .nav__toggle::before, .type-btn::before{
+  content:'';
+  position:absolute; inset:0;
+  z-index:-1;
+  border-radius:inherit;
+  background:radial-gradient(210px circle at var(--shine-x) var(--shine-y), rgba(255,255,255,.4), transparent 70%);
+  opacity:var(--shine-o);
+  transition:opacity .25s ease;
+  pointer-events:none;
+}
+.btn::after, .theme-toggle::after, .nav__toggle::after, .type-btn::after{
+  content:'';
+  position:absolute;
+  top:-30%; left:-70%;
+  width:55%; height:160%;
+  background:linear-gradient(100deg, transparent, rgba(255,255,255,.5), transparent);
+  transform:translateX(-40%) skewX(-18deg);
+  z-index:-1;
+  pointer-events:none;
+  transition:transform .7s var(--ease-out);
+}
+.btn:hover::after, .btn:focus-visible::after,
+.theme-toggle:hover::after, .theme-toggle:focus-visible::after,
+.nav__toggle:hover::after, .nav__toggle:focus-visible::after,
+.type-btn:hover::after, .type-btn:focus-visible::after{
+  transform:translateX(420%) skewX(-18deg);
+}
+@media (prefers-reduced-motion: reduce){
+  .btn::before, .btn::after, .theme-toggle::before, .theme-toggle::after,
+  .nav__toggle::before, .nav__toggle::after, .type-btn::before, .type-btn::after{
+    transition:none; display:none;
+  }
+}
 
 /* ---------------------------------------------------------------------- */
 /* Cards / surfaces                                                       */
@@ -408,6 +458,7 @@ html[data-theme="light"] .floating-lines{opacity:.8;}
   margin-bottom:24px;
 }
 .type-btn{
+  position:relative; overflow:hidden; z-index:0;
   display:flex; flex-direction:column; align-items:center; gap:6px;
   padding:14px 8px;
   border-radius:var(--radius-s);
@@ -673,6 +724,14 @@ textarea.input{resize:vertical; min-height:90px; font-family:var(--font-body);}
   }
   .nav__links.is-open a{padding:12px 14px;}
   .nav__toggle{display:block;}
+}
+@media (max-width: 560px){
+  /* The header CTA duplicates the hero's own "Create a QR code" button
+     and the hamburger menu's "Generator" link, and doesn't fit next to
+     the theme toggle + menu button on narrow phones without overflowing
+     past the edge of the screen — so it's dropped at this width rather
+     than left to clip. */
+  .nav__actions .btn--primary{display:none;}
 }
 @media (max-width: 640px){
   .container{padding:0 18px;}

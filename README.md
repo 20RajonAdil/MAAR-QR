@@ -56,3 +56,7 @@ No environment variables, secrets, or server config are required.
 
 - Camera scanning requires HTTPS (GitHub Pages serves over HTTPS by default) and browser permission.
 - Colors, fonts, and layout follow the design brief: Space Grotesk for display type, Inter for body text, and a deep emerald / dark teal / charcoal / gold palette, with a dark theme by default and a light theme toggle.
+
+## Offline support
+
+This app works fully offline as a PWA — it caches itself for offline use automatically, no manual download step required.

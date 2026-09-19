@@ -610,6 +610,14 @@
 <script src="js/app.js" defer></script>
 
 <script>
+  // Offline support: caches the whole tool on first visit so it keeps
+  // working (QR + PDF generation included) with no connection at all.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  }
+</script>
+
+<script>
   // Sync the hero quick-input with the main generator's URL field
   document.getElementById('heroQuickInput')?.addEventListener('input', (e) => {
     const urlField = document.getElementById('f-url');
